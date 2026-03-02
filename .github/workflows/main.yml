@@ -1,0 +1,25 @@
+name: Wake up All Supabase Projects
+on:
+  schedule:
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping-all:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake them up
+        run: |
+          echo '${{ secrets.SUPABASE_PROJECTS_JSON }}' | jq -c '.[]' | while read -r project; do
+            URL=$(echo $project | jq -r '.url')
+            KEY=$(echo $project | jq -r '.key')
+            echo "Checking: $URL"
+            curl -s -X GET "$URL/rest/v1/" \
+              -H "apikey: $KEY" \
+              -H "Authorization: Bearer $KEY" > /dev/null
+            if [ $? -eq 0 ]; then
+              echo "✅ 성공!"
+            else
+              echo "❌ 실패!"
+            fi
+          done
