@@ -1,25 +1,17 @@
-name: Wake up All Supabase Projects
+name: Supabase Daily Active Trace
+
 on:
   schedule:
-    - cron: '0 0 */3 * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # 매일 한국 시간 오전 9시(UTC 00:00)에 실행
+  workflow_dispatch: # 필요할 때 버튼 눌러서 즉시 실행 가능
 
 jobs:
-  ping-all:
+  wake_up_supabase:
     runs-on: ubuntu-latest
     steps:
-      - name: Wake them up
+      - name: Fetch Data from Supabase (Actual Query)
         run: |
-          echo '${{ secrets.SUPABASE_PROJECTS_JSON }}' | jq -c '.[]' | while read -r project; do
-            URL=$(echo $project | jq -r '.url')
-            KEY=$(echo $project | jq -r '.key')
-            echo "Checking: $URL"
-            curl -s -X GET "$URL/rest/v1/" \
-              -H "apikey: $KEY" \
-              -H "Authorization: Bearer $KEY" > /dev/null
-            if [ $? -eq 0 ]; then
-              echo "✅ 성공!"
-            else
-              echo "❌ 실패!"
-            fi
-          done
+          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/rules?select=id&limit=1" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Content-Type: application/json"
