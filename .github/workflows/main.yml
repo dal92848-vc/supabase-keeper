@@ -1,17 +1,19 @@
-name: Supabase Daily Active Trace
+name: Supabase Strong Wake Up
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 매일 한국 시간 오전 9시(UTC 00:00)에 실행
-  workflow_dispatch: # 필요할 때 버튼 눌러서 즉시 실행 가능
+    - cron: '0 0 * * *' # 매일 한국 시간 오전 9시 실행
+  workflow_dispatch: # 지금 즉시 실행해보기 버튼
 
 jobs:
-  wake_up_supabase:
+  ping_supabase:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch Data from Supabase (Actual Query)
+      - name: Write Activity Log to Supabase
         run: |
-          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/rules?select=id&limit=1" \
+          curl -f -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/keep_alive" \
           -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Content-Type: application/json"
+          -H "Content-Type: application/json" \
+          -H "Prefer: resolution=merge-duplicates" \
+          -d '{"id": 1, "last_ping": "now()"}'
