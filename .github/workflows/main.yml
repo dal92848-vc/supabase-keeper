@@ -1,19 +1,15 @@
-name: Supabase Strong Wake Up
+name: Supabase Management API Wake Up
 
 on:
   schedule:
     - cron: '0 0 * * *' # 매일 한국 시간 오전 9시 실행
-  workflow_dispatch: # 지금 즉시 실행해보기 버튼
+  workflow_dispatch: # 직접 실행해보기 버튼
 
 jobs:
-  ping_supabase:
+  management_ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Write Activity Log to Supabase
+      - name: Fetch Project Details (Simulate Dashboard Login)
         run: |
-          curl -f -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/keep_alive" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Content-Type: application/json" \
-          -H "Prefer: resolution=merge-duplicates" \
-          -d '{"id": 1, "last_ping": "now()"}'
+          curl -f -X GET "https://api.supabase.com/v1/projects/${{ secrets.SUPABASE_PROJECT_REF }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}"
